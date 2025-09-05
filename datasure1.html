@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>有数工具箱 心里有数，工程有谱</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-bg: #f8f9fa;
+            --dark-bg: #1a2530;
+            --card-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary-color), var(--dark-bg));
+            color: #333;
+            min-height: 100vh;
+        }
+        
+        .app-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            margin: 20px auto;
+            max-width: 1400px;
+        }
+        
+        /* 导航栏样式 */
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--secondary-color) !important;
+        }
+        
+        /* 侧边栏样式 */
+        .sidebar {
+            background: var(--light-bg);
+            padding: 20px;
+            height: 100%;
+            border-right: 1px solid #dee2e6;
+        }
+        
+        .category-header {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-top: 20px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid var(--secondary-color);
+        }
+        
+        .subcategory-item {
+            padding: 8px 15px;
+            border-radius: 5px;
+            margin: 5px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .subcategory-item:hover, .subcategory-item.active {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        /* 主内容区样式 */
+        .main-content {
+            padding: 20px;
+            background: white;
+        }
+        
+        /* 工具卡片样式 */
+        .tool-card {
+            border: none;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+        
+        .tool-img-container {
+            height: 160px;
+            overflow: hidden;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .tool-img {
+            object-fit: cover;
+            height: 100%;
+            width: 100%;
+        }
+        
+        .card-body {
+            padding: 15px;
+        }
+        
+        .card-title {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        /* 广告区域样式 */
+        .ad-container {
+            background: linear-gradient(to right, #4b6cb7, #182848);
+            border-radius: 10px;
+            padding: 15px;
+            color: white;
+            margin: 30px 0;
+            text-align: center;
+        }
+        
+        /* 页脚样式 */
+        .footer {
+            background: var(--dark-bg);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        /* 视图切换按钮 */
+        .view-toggle {
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 5px;
+            background: var(--light-bg);
+        }
+        
+        .view-toggle.active {
+            background: var(--secondary-color);
+            color: white;
+        }
+        
+        /* 列表视图样式 */
+        .list-view .tool-card {
+            display: flex;
+            flex-direction: row;
+            height: auto;
+        }
+        
+        .list-view .tool-img-container {
+            width: 200px;
+            height: 120px;
+            flex-shrink: 0;
+        }
+        
+        /* iframe样式 */
+        .tool-frame-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 1000;
+            padding: 20px;
+        }
+        
+        .frame-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        #tool-iframe {
+            width: 100%;
+            height: calc(100% - 60px);
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .sidebar {
+                border-right: none;
+                border-bottom: 1px solid #dee2e6;
+            }
+            
+            .list-view .tool-card {
+                flex-direction: column;
+            }
+            
+            .list-view .tool-img-container {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 导航栏 -->
+        <nav class="navbar navbar-expand-lg navbar-dark" style="background: var(--primary-color);">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">
+                    <i class="bi bi-tools"></i> 有数工具箱 
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#">首页</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">最新工具</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">热门工具</a>
+                        </li>
+                    </ul>
+                    <form class="d-flex">
+                        <input class="form-control me-2" type="search" placeholder="搜索工具..." id="search-input">
+                        <button class="btn btn-outline-light" type="button" id="search-btn">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container-fluid">
+            <div class="row">
+                <!-- 侧边栏 - 分类导航 -->
+                <div class="col-lg-3 col-md-4 p-0">
+                    <div class="sidebar">
+                        <h5 class="category-header">设计工具</h5>
+                        <div class="subcategory-item active" data-category="design">所有设计工具</div>
+                        <div class="subcategory-item" data-category="ui">UI设计</div>
+                        <div class="subcategory-item" data-category="ux">UX设计</div>
+                        <div class="subcategory-item" data-category="graphic">平面设计</div>
+
+                        <h5 class="category-header">开发工具</h5>
+                        <div class="subcategory-item" data-category="web">Web开发</div>
+                        <div class="subcategory-item" data-category="mobile">移动开发</div>
+                        <div class="subcategory-item" data-category="database">数据库</div>
+
+                        <h5 class="category-header">营销工具</h5>
+                        <div class="subcategory-item" data-category="seo">SEO优化</div>
+                        <div class="subcategory-item" data-category="social">社交媒体</div>
+                        <div class="subcategory-item" data-category="analytics">数据分析</div>
+                    </div>
+                </div>
+
+                <!-- 主内容区 -->
+                <div class="col-lg-9 col-md-8">
+                    <div class="main-content">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h4>所有工具</h4>
+                            <div class="d-flex">
+                                <span class="me-2">视图：</span>
+                                <span class="view-toggle active me-2" data-view="grid">
+                                    <i class="bi bi-grid-3x3-gap"></i> 平铺
+                                </span>
+                                <span class="view-toggle" data-view="list">
+                                    <i class="bi bi-list-task"></i> 列表
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- 工具卡片容器 -->
+                        <div class="row" id="tools-container">
+                            <!-- 工具卡片将通过JavaScript动态生成 -->
+                        </div>
+
+                        <!-- 广告区域 -->
+                        <div class="ad-container">
+                            <h5>升级专业版工具包</h5>
+                            <p>获取所有高级工具的无限制访问权限</p>
+                            <button class="btn btn-light">立即升级</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 工具iframe容器 -->
+        <div class="tool-frame-container" id="tool-frame-container">
+            <div class="frame-header">
+                <h5 id="frame-title">工具预览</h5>
+                <button class="btn btn-secondary" id="close-frame">
+                    <i class="bi bi-x-lg"></i> 关闭
+                </button>
+            </div>
+            <iframe id="tool-iframe" src="about:blank"></iframe>
+        </div>
+
+        <!-- 页脚 -->
+        <div class="footer">
+            <p>&copy; 2025 有数工具箱 | 心里有数，工程有谱 | 提供最全面的工具资源 | 致力于为工程师提供最专业的计算工具和设计资源，助力创新与卓越设计。by:Caden Qi</p>
+            <div>
+                <a href="#" class="text-light me-3">关于我们</a>
+                <a href="#" class="text-light me-3">隐私政策</a>
+                <a href="#" class="text-light">联系我们</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 工具数据 - 用户只需修改此处的图片链接和工具信息
+        const toolsData = [
+            {
+                category: "design",
+                subcategory: "ui",
+                image: "https://placehold.co/600x400/3498db/white?text=UI+Design+Tool",
+                title: "Figma",
+                description: "协作式UI设计工具",
+                link: "https://www.figma.com"
+            },
+            {
+                category: "design",
+                subcategory: "ux",
+                image: "https://placehold.co/600x400/e74c3c/white?text=UX+Tool",
+                title: "Adobe XD",
+                description: "用户体验设计工具",
+                link: "https://www.adobe.com/products/xd.html"
+            },
+            {
+                category: "design",
+                subcategory: "graphic",
+                image: "https://placehold.co/600x400/2ecc71/white?text=Graphic+Design",
+                title: "Canva",
+                description: "在线平面设计平台",
+                link: "https://www.canva.com"
+            },
+            {
+                category: "development",
+                subcategory: "web",
+                image: "https://placehold.co/600x400/9b59b6/white?text=Web+Dev",
+                title: "VS Code",
+                description: "强大的代码编辑器",
+                link: "https://code.visualstudio.com"
+            },
+            {
+                category: "development",
+                subcategory: "mobile",
+                image: "https://placehold.co/600x400/f39c12/white?text=Mobile+App",
+                title: "Flutter",
+                description: "跨平台移动应用开发框架",
+                link: "https://flutter.dev"
+            },
+            {
+                category: "development",
+                subcategory: "database",
+                image: "https://placehold.co/600x400/34495e/white?text=Database",
+                title: "MySQL",
+                description: "关系型数据库管理系统",
+                link: "https://www.mysql.com"
+            },
+            {
+                category: "marketing",
+                subcategory: "seo",
+                image: "https://placehold.co/600x400/16a085/white?text=SEO+Tool",
+                title: "SEMrush",
+                description: "全面的SEO优化工具",
+                link: "https://www.semrush.com"
+            },
+            {
+                category: "marketing",
+                subcategory: "social",
+                image: "https://placehold.co/600x400/e67e22/white?text=Social+Media",
+                title: "Hootsuite",
+                description: "社交媒体管理平台",
+                link: "https://www.hootsuite.com"
+            },
+            {
+                category: "marketing",
+                subcategory: "analytics",
+                image: "https://placehold.co/600x400/27ae60/white?text=Analytics",
+                title: "Google Analytics",
+                description: "网站流量分析工具",
+                link: "https://analytics.google.com"
+            }
+        ];
+
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 渲染所有工具
+            renderTools(toolsData);
+            
+            // 添加分类筛选事件
+            document.querySelectorAll('.subcategory-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    // 更新激活状态
+                    document.querySelectorAll('.subcategory-item').forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // 根据分类筛选工具
+                    const category = this.getAttribute('data-category');
+                    filterToolsByCategory(category);
+                });
+            });
+            
+            // 添加搜索功能
+            document.getElementById('search-btn').addEventListener('click', searchTools);
+            document.getElementById('search-input').addEventListener('keyup', function(e) {
+                if (e.key === 'Enter') searchTools();
+            });
+            
+            // 添加视图切换功能
+            document.querySelectorAll('.view-toggle').forEach(toggle => {
+                toggle.addEventListener('click', function() {
+                    document.querySelectorAll('.view-toggle').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const viewType = this.getAttribute('data-view');
+                    changeView(viewType);
+                });
+            });
+            
+            // 添加iframe关闭功能
+            document.getElementById('close-frame').addEventListener('click', function() {
+                document.getElementById('tool-frame-container').style.display = 'none';
+            });
+        });
+
+        // 渲染工具卡片
+        function renderTools(tools) {
+            const container = document.getElementById('tools-container');
+            container.innerHTML = '';
+            
+            tools.forEach(tool => {
+                const col = document.createElement('div');
+                col.className = 'col-xl-4 col-lg-6 col-md-6 mb-4';
+                
+                col.innerHTML = `
+                    <div class="tool-card card">
+                        <div class="tool-img-container">
+                            <img src="${tool.image}" class="tool-img" alt="${tool.title}">
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">${tool.title}</h5>
+                            <p class="card-text">${tool.description}</p>
+                            <button class="btn btn-primary btn-sm open-tool" data-link="${tool.link}" data-title="${tool.title}">
+                                打开工具
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(col);
+            });
+            
+            // 添加工具打开事件
+            document.querySelectorAll('.open-tool').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const link = this.getAttribute('data-link');
+                    const title = this.getAttribute('data-title');
+                    
+                    document.getElementById('frame-title').textContent = title;
+                    document.getElementById('tool-iframe').src = link;
+                    document.getElementById('tool-frame-container').style.display = 'block';
+                });
+            });
+        }
+
+        // 按分类筛选工具
+        function filterToolsByCategory(category) {
+            if (category === 'design' || category === 'all') {
+                // 显示所有设计类工具
+                const designTools = toolsData.filter(tool => tool.category === 'design');
+                renderTools(designTools);
+            } else if (category === 'development') {
+                // 显示所有开发类工具
+                const devTools = toolsData.filter(tool => tool.category === 'development');
+                renderTools(devTools);
+            } else if (category === 'marketing') {
+                // 显示所有营销类工具
+                const marketingTools = toolsData.filter(tool => tool.category === 'marketing');
+                renderTools(marketingTools);
+            } else {
+                // 显示特定子分类的工具
+                const filteredTools = toolsData.filter(tool => 
+                    tool.subcategory === category || tool.category === category
+                );
+                renderTools(filteredTools);
+            }
+        }
+
+        // 搜索工具
+        function searchTools() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            
+            if (searchTerm.trim() === '') {
+                renderTools(toolsData);
+                return;
+            }
+            
+            const filteredTools = toolsData.filter(tool => 
+                tool.title.toLowerCase().includes(searchTerm) || 
+                tool.description.toLowerCase().includes(searchTerm)
+            );
+            
+            renderTools(filteredTools);
+        }
+
+        // 切换视图模式
+        function changeView(viewType) {
+            const container = document.getElementById('tools-container');
+            
+            if (viewType === 'list') {
+                container.classList.add('list-view');
+                container.querySelectorAll('.col-xl-4').forEach(col => {
+                    col.className = 'col-12 mb-4';
+                });
+            } else {
+                container.classList.remove('list-view');
+                container.querySelectorAll('.col-12').forEach(col => {
+                    col.className = 'col-xl-4 col-lg-6 col-md-6 mb-4';
+                });
+            }
+        }
+    </script>
+</body>
+</html>
